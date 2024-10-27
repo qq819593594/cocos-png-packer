@@ -9,4 +9,3 @@ new Packer().packageByPath('D://work//yh-core//images//ChooseUnit_img//image', '
         console.error('faild');
     }
 );
-  

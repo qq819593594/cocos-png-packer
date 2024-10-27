@@ -1,5 +1,5 @@
 {
-  "name": "img-packer",
+  "name": "cocos-png-packer",
   "version": "1.0.0",
   "main": "index.js",
   "files": [

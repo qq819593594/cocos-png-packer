@@ -1,4 +1,4 @@
-# **img-packer**
+# **cocos-png-packer**
 
 img-packer用于将指定文件夹下的图片打包成适合cocos creator使用的图集
 

@@ -20,6 +20,9 @@ export default class Packer {
         const names: string[] = [];
         const promiseArr: Promise<any>[] = [];
         Util.mapAllDirFile(inPath, (path: string, fileName: string, curPath: string) => {
+            if (!fileName.endsWith('.png')) {
+                return true;
+            }
             const buffer = Fs.readFileSync(curPath);
             const image = Jimp.read(buffer);
             names.push(fileName);
@@ -170,4 +173,4 @@ export default class Packer {
     }
 }
 
-
+  
