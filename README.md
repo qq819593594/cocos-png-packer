@@ -1,6 +1,6 @@
 # **cocos-png-packer**
 
-img-packer用于将指定文件夹下的图片打包成适合cocos creator使用的图集
+cocos-png-packer用于将指定文件夹下的图片打包成适合cocos creator使用的图集
 
 ### 作用
 
@@ -11,7 +11,7 @@ img-packer用于将指定文件夹下的图片打包成适合cocos creator使用
 ### 使用
 
 ```
-npm install img-packer
+npm install cocos-png-packer
 ```
 
 ```
