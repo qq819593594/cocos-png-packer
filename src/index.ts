@@ -13,15 +13,27 @@ interface PointRecord {
 }
 
 
-export class Packer {
+export default class Packer {
     packageByPath = async (inPath: string, outPath: string, name: string) => {
         const temp: ImageItem[] = []
 
-        await Util.mapAllDirFile(inPath, async (path: string, fileName: string, curPath: string) => {
+        const names: string[] = [];
+        const promiseArr: Promise<any>[] = [];
+        Util.mapAllDirFile(inPath, (path: string, fileName: string, curPath: string) => {
             const buffer = Fs.readFileSync(curPath);
-            const image = await Jimp.read(buffer);
+            const image = Jimp.read(buffer);
+            names.push(fileName);
+            promiseArr.push(image);
 
+            return true;
+        })
 
+        const images = await Promise.all(promiseArr)
+
+        for (let i = 0; i < images.length; i++) {
+            const image = images[i];
+            const name = names[i];
+            
             let height = image.height;
             let width = image.width;
 
@@ -36,7 +48,7 @@ export class Packer {
 
             const imageItem: ImageItem = {
                 image: image,
-                name: fileName,
+                name: name,
                 x: 0,
                 y: 0,
                 w: width,
@@ -45,9 +57,12 @@ export class Packer {
             };
 
             temp.push(imageItem);
+        }
 
-            return true;
-        })
+
+        if (temp.length === 0) {
+            return false;
+        }
 
         temp.sort((a, b) => {
             const aMaxW = a.w;
@@ -64,15 +79,14 @@ export class Packer {
         const pointRecords: PointRecord[] = [];
 
         let bottom = 0;
-        let top = 0;
+        let top = temp[0].h;
         let right = 0;
+
+        const minItem = temp[temp.length - 1];
 
         // 从前往后 只放一遍
         for (let i = 0; i < temp.length; i++) {
             const item = temp[i];
-            if (i === 0) {
-                top = item.h;
-            }
 
             let bIn = false;
 
@@ -80,23 +94,33 @@ export class Packer {
                 const record = pointRecords[j];
                 // 如果能放下就放进去，并将剩余空间切开
                 if ((top - record.b) > item.h && (record.r - record.l) > item.w) {
-                    const lRecord: PointRecord = {
-                        l: record.l,
-                        r: record.l + item.w,
-                        b: record.b + item.h
-                    };
 
-                    const rRecord: PointRecord = {
-                        l: record.l + item.w,
-                        r: record.r,
-                        b: record.b
-                    };
+                    const addArr: PointRecord[] = [];
+
+                    const lBottom = record.b + item.h;
+
+                    if ((lBottom + minItem.h) < top) {
+                        addArr.push({
+                            l: record.l,
+                            r: record.l + item.w,
+                            b: lBottom
+                        })
+                    }
+
+                    const rLeft = record.l + item.w
+                    if ((rLeft + minItem.w) < record.r) {
+                        addArr.push({
+                            l: rLeft,
+                            r: record.r,
+                            b: record.b
+                        })
+                    }
 
 
                     item.x = record.l;
                     item.y = record.b;
 
-                    pointRecords.splice(j, 1, lRecord, rRecord)
+                    pointRecords.splice(j, 1, ...addArr)
 
                     bIn = true;
                     break;
@@ -141,12 +165,9 @@ export class Packer {
         const pListPath = path.join(outPath, `${name}.plist`);
         Fs.writeFileSync(pListPath, xmlStr);
 
+        return true;
+
     }
 }
 
-try {
-    new Packer().packageByPath('D://work//yh-core//images//ChooseUnit_img//image', 'D://work//yh-core//images//ChooseUnit_img//plist', 'ssss');
-} catch (e) {
-    console.log(e);
-}
 
