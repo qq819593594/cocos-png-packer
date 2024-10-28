@@ -4,7 +4,7 @@ import * as Path from "path";
 export class Util {
     static mapAllDirFile = (path: string, callBack: (path: string, fileName: string, curPath: string) => boolean) => {
         if (!Fs.existsSync(path)) {
-            throw('url not exit');
+            throw(`url: ${path} not exit`);
         }
         const files = Fs.readdirSync(path)
         for (let i = 0; i < files.length; i++) {
